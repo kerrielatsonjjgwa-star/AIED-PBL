@@ -7,21 +7,23 @@ import { fileURLToPath } from 'url';
 
 dotenv.config();
 
+// 处理 ES Module 下的 __dirname 问题
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+// Koyeb 会自动分配端口到环境变量 PORT，本地则用 3000
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-// API Proxy Route
+// ================= API 路由部分 =================
+
 app.post('/api/chat', async (req, res) => {
   try {
     const { messages, temperature, response_format } = req.body;
     
-    // Server-side validation or default params
     const apiKey = process.env.DEEPSEEK_API_KEY;
     if (!apiKey) {
       return res.status(500).json({ error: 'Server configuration error: API Key missing' });
@@ -56,15 +58,26 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// Serve frontend in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../dist')));
-  
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
-  });
-}
+// ================= 前端静态文件托管部分 =================
+
+// 1. 定义构建后的静态文件目录 (Vite 生成的 dist 文件夹)
+const distPath = path.join(__dirname, '../dist');
+
+// 2. 告诉 Express 使用这个目录下的静态文件 (JS, CSS, 图片等)
+app.use(express.static(distPath));
+
+// 3. 处理所有未被上面 API 捕获的请求，都返回网页首页 (index.html)
+// 这样即使刷新页面，React 路由也能正常工作
+app.get('*', (req, res) => {
+  // 如果请求的是 API 但没匹配到，返回 404，而不是 HTML
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'API Not Found' });
+  }
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
+// ================= 启动服务器 =================
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
