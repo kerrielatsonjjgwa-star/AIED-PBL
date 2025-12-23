@@ -3,7 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { AGENTS } from '../data/agents';
 import { getEvidenceByIds } from '../data/evidence';
 import { EvidenceDoc } from '../types';
-import { FileText, Copy, Plus } from 'lucide-react';
+import { FileText, Copy, Plus, X } from 'lucide-react';
 import clsx from 'clsx';
 
 interface EvidencePanelProps {
@@ -40,7 +40,7 @@ const EvidencePanel: React.FC<EvidencePanelProps> = ({ onUseEvidence }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 h-full flex flex-col">
+    <div className="bg-white rounded-lg shadow-md p-4 h-full flex flex-col relative">
       <div className="flex items-center gap-2 mb-3">
         <FileText className="w-5 h-5 text-indigo-600" />
         <h3 className="font-bold text-gray-700">证据文件</h3>
@@ -70,13 +70,21 @@ const EvidencePanel: React.FC<EvidencePanelProps> = ({ onUseEvidence }) => {
       </div>
 
       {openDoc && (
-        <div className="mt-3 border-t pt-3">
-          <div className="text-sm font-bold text-gray-800">{openDoc.title}</div>
-          <div className="text-xs text-gray-600 mt-1">{openDoc.summary}</div>
-          <pre className="text-xs text-gray-700 mt-2 bg-gray-50 border border-gray-200 rounded-md p-3 whitespace-pre-wrap max-h-44 overflow-y-auto">
+        <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50 max-h-[400px] flex flex-col">
+          <div className="flex justify-between items-start mb-2">
+            <div className="text-sm font-bold text-gray-800">{openDoc.title}</div>
+            <button 
+              onClick={() => setOpenDocId(null)}
+              className="p-1 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="text-xs text-gray-600 mb-2">{openDoc.summary}</div>
+          <pre className="text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded-md p-3 whitespace-pre-wrap flex-1 overflow-y-auto">
             {openDoc.content.trim()}
           </pre>
-          <div className="mt-2 flex gap-2">
+          <div className="mt-3 flex gap-2 shrink-0">
             <button
               type="button"
               onClick={() => handleCopy(openDoc)}
