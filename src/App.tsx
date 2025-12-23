@@ -168,9 +168,9 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 font-sans">
+    <div className="min-h-screen bg-gray-100 text-gray-900 font-sans flex flex-col h-screen">
       <TutorialOverlay />
-      <header className="bg-white shadow-sm border-b border-gray-200 p-4">
+      <header className="bg-white shadow-sm border-b border-gray-200 p-4 shrink-0">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="bg-indigo-600 text-white p-2 rounded-lg font-bold">CP</div>
@@ -197,15 +197,16 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto p-4 grid grid-cols-12 gap-4 h-[calc(100vh-80px)] overflow-hidden">
+      <main className="flex-1 max-w-7xl mx-auto p-4 grid grid-cols-12 gap-4 overflow-hidden w-full">
         
-        <div className="col-span-2 h-full">
+        <div className="col-span-2 h-full overflow-hidden">
           <Sidebar />
         </div>
 
-        <div className="col-span-7 flex flex-col gap-4 h-full overflow-y-auto">
+        <div className="col-span-7 flex flex-col gap-4 h-full overflow-hidden">
           
-          <div className="flex-1 min-h-[400px]">
+          {/* Map Grid - Fixed height, no shrink */}
+          <div className="shrink-0">
             <MapGrid onCellClick={(id) => {
                const types: GridCellType[] = ['residential', 'factory', 'park', 'commercial', 'empty'];
                const currentType = useGameStore.getState().grid.find(c => c.id === id)?.type ?? 'empty';
@@ -214,10 +215,11 @@ function App() {
             }} />
           </div>
 
-          <div className="h-[600px] shrink-0">
+          {/* Interaction Area - Fills remaining height */}
+          <div className="flex-1 min-h-0 flex flex-col">
              {phase === 'proposal' ? (
-               <div className="bg-white p-6 rounded-lg shadow-md h-full flex flex-col">
-                 <div className="flex justify-between items-center mb-4">
+               <div className="bg-white p-6 rounded-lg shadow-md h-full flex flex-col overflow-auto">
+                 <div className="flex justify-between items-center mb-4 shrink-0">
                    <h3 className="text-lg font-bold">提案阶段</h3>
                    {hasErrors && (
                       <div className="flex items-center gap-2 text-red-600 text-sm font-bold bg-red-50 px-3 py-1 rounded-full">
@@ -227,14 +229,14 @@ function App() {
                    )}
                  </div>
                  
-                 <p className="text-sm text-gray-500 mb-2">填写策略陈述，并在右侧引用证据文件。</p>
+                 <p className="text-sm text-gray-500 mb-2 shrink-0">填写策略陈述，并在右侧引用证据文件。</p>
                  <textarea 
-                   className="w-full flex-1 border border-gray-300 rounded-lg p-4 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"
+                   className="w-full flex-1 border border-gray-300 rounded-lg p-4 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none min-h-[100px]"
                    placeholder="例如：将废弃工厂改为创业园区带动经济，同时新增口袋公园降低热岛并安抚居民。"
                    value={strategy}
                    onChange={(e) => setStrategy(e.target.value)}
                  />
-                 <div className="mt-4 flex justify-end">
+                 <div className="mt-4 flex justify-end shrink-0">
                     <button 
                       onClick={handleNextPhase}
                       disabled={hasErrors}
@@ -255,7 +257,7 @@ function App() {
                </div>
              ) : phase === 'approval' ? (
                <div className="h-full flex flex-col gap-3">
-                 <div className="bg-white p-4 rounded-lg shadow-md">
+                 <div className="bg-white p-4 rounded-lg shadow-md shrink-0">
                    <div className="flex items-center justify-between gap-3">
                      <h3 className="text-base font-bold text-gray-800">审批补充说明</h3>
                      <div className="flex gap-2">
@@ -278,37 +280,41 @@ function App() {
                      </div>
                    </div>
                    <textarea
-                     className="mt-3 w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none h-28"
+                     className="mt-3 w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none h-24 text-sm"
                      placeholder="补充合规、预算、扰民控制等要点（可从右侧证据复制引用）。"
                      value={strategy}
                      onChange={(e) => setStrategy(e.target.value)}
                      disabled={isProcessing}
                    />
                  </div>
-                 <div className="flex-1 min-h-0">
+                 <div className="flex-1 min-h-0 overflow-hidden">
                    <ChatInterface />
                  </div>
                </div>
              ) : (
-               <ChatInterface />
+               <div className="h-full overflow-hidden">
+                 <ChatInterface />
+               </div>
              )}
           </div>
         </div>
 
-        <div className="col-span-3 flex flex-col gap-4 h-full">
-          <MetricBar metrics={useGameStore((s) => s.metrics)} />
-          <div className="h-[360px]">
+        <div className="col-span-3 flex flex-col gap-4 h-full overflow-hidden">
+          <div className="shrink-0">
+            <MetricBar metrics={useGameStore((s) => s.metrics)} />
+          </div>
+          <div className="h-[300px] shrink-0">
             <EvidencePanel
               onUseEvidence={(text) => {
                 setStrategy((prev) => (prev ? `${prev}\n\n${text}` : text));
               }}
             />
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-h-0 overflow-hidden">
              <NewsFeed />
           </div>
           
-          <div className="bg-white p-4 rounded-lg shadow-md border-t-4 border-indigo-500">
+          <div className="bg-white p-4 rounded-lg shadow-md border-t-4 border-indigo-500 shrink-0">
              <h4 className="font-bold text-gray-700 mb-2">Current Phase: {phase.toUpperCase()}</h4>
              <p className="text-xs text-gray-500 mb-4">
                {phase === 'investigation' && "调研：与各方对话，收集诉求与证据。"}
